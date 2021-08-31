@@ -78,33 +78,33 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             else if (upDown.toInt() == 0 && sides.toInt() > 0 && zAxis.toInt() < 9){
                 //phone is upright sideway or in landscape upDown.toInt() == 0
                 square.text = "⬅️"
-                Color.CYAN
+                Color.YELLOW
             } else if (upDown.toInt() == 0 && sides.toInt() < 0 && zAxis.toInt() < 9){
                 //phone is upright sideway or in landscape upDown.toInt() == 0
                 square.text = "➡️"
-                Color.CYAN
+                Color.YELLOW
             } else if (upDown.toInt() > 0 && sides.toInt() < 0 && zAxis.toInt() < 9){
                 //phone is upright sideway or in landscape upDown.toInt() == 0
                 square.text = "↘️"
-                Color.CYAN
+                Color.YELLOW
             }
             else if (upDown.toInt() > 0 && sides.toInt() > 0 && zAxis.toInt() < 9){
                 //phone is upright sideway or in landscape upDown.toInt() == 0
                 square.text = "↙️"
-                Color.CYAN
+                Color.YELLOW
             }
             else if (upDown.toInt() < 0 && sides.toInt() < 0 && zAxis.toInt() < 9){
                 //phone is upright sideway or in landscape upDown.toInt() == 0
                 square.text = "↗️"
-                Color.CYAN
+                Color.YELLOW
             }
             else if (upDown.toInt() < 0 && sides.toInt() > 0 && zAxis.toInt() < 9){
                 //phone is upright sideway or in landscape upDown.toInt() == 0
                 square.text = "↖️️"
-                Color.CYAN
+                Color.YELLOW
             }
             else {
-                Color.CYAN
+                Color.YELLOW
             }
             square.setBackgroundColor(color)
 
