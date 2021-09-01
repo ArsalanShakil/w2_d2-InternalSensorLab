@@ -5,16 +5,22 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
     private lateinit var square: TextView
+    private lateinit var pd: CircularProgressBar
 
+    private var brightness: Sensor? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -22,12 +28,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // Keeps phone in light mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-        square = findViewById(R.id.tv_square)
-
-        setUpSensorStuff()
+        square = findViewById(R.id.square)
+        pd = findViewById(R.id.circularProgressBar)
+        setUpSensor()
+        setUpLight()
     }
 
-    private fun setUpSensorStuff() {
+    private fun setUpSensor() {
         // Create the sensor manager
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
 
@@ -40,12 +47,27 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 SensorManager.SENSOR_DELAY_FASTEST
             )
         }
+
+    }
+
+    private fun setUpLight(){
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        brightness = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        if (brightness!=null){
+            sensorManager.registerListener(
+                this,
+                brightness,
+                SensorManager.SENSOR_DELAY_FASTEST,
+                SensorManager.SENSOR_DELAY_FASTEST
+            )
+        }
+
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
         // Checks for the sensor we have registered
         if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            //Log.d("Main", "onSensorChanged: sides ${event.values[0]} front/back ${event.values[1]} ")
+            Log.d("Main", "onSensorChanged: sides ${event.values[0]} front/back ${event.values[1]} ")
 
             // Sides = Tilting phone left(10) and right(-10)
             val sides = event.values[0]
@@ -61,6 +83,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             val color = if (upDown.toInt() == 0 && sides.toInt() == 0 && zAxis.toInt() == 0) {
                 //phone falling
                 square.text = "\uD83D\uDE40"
+                Toast.makeText(applicationContext,"\uD83D\uDE40 phone was in free fall", Toast.LENGTH_SHORT).show()
                 Color.GREEN
             } else if (upDown.toInt() == 0 && sides.toInt() == 0 && zAxis.toInt() != 0) {
                 //phone is resting
@@ -110,10 +133,32 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             //square.text = "up/down ${upDown.toInt()}\nleft/right ${sides.toInt()}\n" + "z/z ${zAxis.toInt()}"
         }
+        if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
+            val light = event.values[0]
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                pd.setProgressWithAnimation(light)
+            }
+            Log.d("light", " ${light.toInt()}  ")
+
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         return
+    }
+
+
+
+    override fun onResume() {
+        super.onResume()
+        // Register a listener for the sensor.
+        sensorManager.registerListener(this, brightness, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
     }
 
     override fun onDestroy() {
